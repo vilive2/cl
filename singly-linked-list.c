@@ -89,6 +89,22 @@ void InsertNewLastNode(char *A, NodePointer *L) { /* Again, expect **L */
 
 }
 
+void InsertBeforeNodeN(NodePointer N, NodePointer M) { /* expect N and M are not null */
+                                                        /* N is a Node in a List L */
+                                                        /* M is a new Node to be inserted */
+                                                        /* so that M->Link == N */
+
+    /* Insert M after N */
+    M->Link = N->Link;                              /* Make M->Link point to N->Link */
+    N->Link = M;                                    /* Make N->Link point to M */
+    
+    /* Swap(N->Airport, M->Airport) */
+    char tmp[4];
+    strcpy(tmp, N->Airport);
+    strcpy(N->Airport, M->Airport);
+    strcpy(M->Airport, tmp);
+}
+
 void DeleteLastNode(NodePointer *L) {           /* Note: **L is the address of the */
                                                 /* variable L, whose value points */
                                                 /* to the fist node of list L */
@@ -129,6 +145,72 @@ void DeleteLastNode(NodePointer *L) {           /* Note: **L is the address of t
 
 }
 
+NodePointer Copy(NodePointer L) { /* Expect Pointer to list L to be copied */
+                                    /* Creates new copy of L and return first node of new list */
+
+    NodePointer CL, P ;             /* CL be copy list */
+                                    /* P be prev node added in CL */
+                            
+    if (L != NULL) {              /* If L is not empty */
+
+        /* Initialize CL with new storage and Copy Airport of L */
+        CL = (NodePointer) malloc(sizeof(NodeType));
+        strcpy(CL->Airport, L->Airport);
+        CL->Link = NULL;
+        
+        L = L->Link;            /* Advance L */
+
+        P = CL;                 /* Initialize P with CL */
+        
+        while (L != NULL) {     /* Until L is not NULL */
+
+            /* Add New node in CL at P->Link with same Airport as L */
+            P->Link = (NodePointer) malloc(sizeof(NodeType));
+            strcpy(P->Link->Airport, L->Airport);
+            P->Link->Link = NULL;
+
+            /* Advance L and P */
+            L = L->Link;
+            P = P->Link;
+        }
+
+    }
+
+    return CL;      /* return CL */
+}
+
+void Reverse(NodePointer *L) { /* expect **L is the address of the */
+                                /* variable L whose value points to */
+                                /* first node in List L */
+
+    /* RL reverse list of L*/
+    /* P node in L accessing sequentially one by one */
+    /* NP next node in L coming to be accessed */
+    NodePointer RL, P, NP;
+
+    if ( *L != NULL ) {     /* If L is not empty */
+
+        /* Initialize P by value of L */
+        P = *L;
+        RL = NULL;
+
+        while( P != NULL ) {    /* Until P is not NULL */
+
+            NP = P->Link;       /* Keep next node in NP */
+
+            /* Add P as new first node in RL */
+            P->Link = RL;
+            RL = P;
+
+            P = NP;         /* Make P point to NP */
+        }
+
+        /* Overide value of L with RL */
+        *L = RL;
+    }
+
+}
+
 int main() {
 
     NodePointer L;
@@ -160,6 +242,33 @@ int main() {
     DeleteLastNode(&L);
 
     /* Finally, print the shortened list */
+    PrintList(L);
+
+    /* Insert CCU before ORD */
+    NodePointer ord = ListSearch("ORD", L);
+    if(ord != NULL) {
+        NodePointer ccu = (NodePointer) malloc(sizeof(NodeType));
+        strcpy(ccu->Airport, "CCU");
+        ccu->Link = NULL;
+        InsertBeforeNodeN(ord, ccu);
+
+        PrintList(L);
+    } else {
+        printf("ORD not found\n");
+    }
+
+    /* Copy L into CL */
+    NodePointer CL = Copy(L);
+
+    /* Print CL */
+    printf("copy of L as CL : ");
+    PrintList(CL);
+
+    /* Reverse L */
+    printf("L : ");
+    PrintList(L);
+    Reverse(&L);
+    printf("Reversed L : ");
     PrintList(L);
 
     return 0;
