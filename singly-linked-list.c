@@ -211,6 +211,39 @@ void Reverse(NodePointer *L) { /* expect **L is the address of the */
 
 }
 
+NodePointer Concat(NodePointer L1, NodePointer L2) {    /* Expect two list L1 and L2 */
+                                                        /* Concat L2 at end of L1 */
+                                                        /* Return Pointer to first node of final List */
+
+    /* Let L be the pointer to final List first node */
+    NodePointer L;
+
+    if (L1 == NULL) {                    /* Check if L1 is empty, then final list will have L2 only */
+        
+        L = L2;
+    
+    } else if (L2 == NULL) {             /* Check if L2 is empty, then final list will have L1 only */
+
+        L = L1;
+
+    } else {                             /* Otherwise L1 and L2 both are non empty */
+
+        /* Make L point to first node in L1, as it will in final List as well */
+        L = L1; 
+        
+        /* Move L1 to point to last node in L1 */
+        while (L1->Link != NULL) {
+
+            L1 = L1->Link;
+
+        }
+
+        L1->Link = L2;              /* Make Link of L1's last node point to L2 */
+    }
+    
+    return L;                       /* finally return L*/
+}
+
 int main() {
 
     NodePointer L;
@@ -269,6 +302,11 @@ int main() {
     PrintList(L);
     Reverse(&L);
     printf("Reversed L : ");
+    PrintList(L);
+
+    /*  Concat L and CL */
+    L = Concat(L, CL);
+    printf("L and CL merged: \n");
     PrintList(L);
 
     return 0;
