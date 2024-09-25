@@ -2,8 +2,8 @@
 
 int main() {
 
-    char c;
-    // int c;
+    // char c;
+    int c;
 
     printf("[ ");
     while((c = fgetc(stdin)) != EOF) {
