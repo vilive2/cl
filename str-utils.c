@@ -31,11 +31,18 @@ int diff_by_one(char *s, char *t) {
     return diff == 1;
 }
 
+int add(int *a, int n) {
+    return 10;
+}
+
 int main() {
 
-    char *s = "sale", *t = "sale";
-    printf("is one diff :%d\n", diff_by_one(s, t));
-    printf("are same :%d\n", strcmp1(s, t));
+    int a[10] = {1, 2, 3}, s;
+    s = add(s, 5);
+
+    // char *s = "sale", *t = "sale";
+    // printf("is one diff :%d\n", diff_by_one(s, t));
+    // printf("are same :%d\n", strcmp1(s, t));
 
     return 0;
 }
