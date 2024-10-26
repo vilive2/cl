@@ -1,3 +1,6 @@
+#include<stdio.h>
+#include<stdlib.h>
+
 typedef struct tnode {
     int d;
     int left, right, parent;
@@ -11,6 +14,29 @@ typedef struct{
 int init_tree(TREE *t, int capacity);
 void read_tree(TREE *t);
 void print_tree(TREE *t);
+
+/*
+    print Binary tree rotated by 90 degrees anticlockwise
+*/
+
+void print_rotated_tree(TREE *t, int root, int spaces) {
+    if(root == -1) return;
+    print_rotated_tree(t, t->nodelist[root].right, spaces + 4);
+    printf("%*s%d\n", spaces, "", t->nodelist[root].d);
+    print_rotated_tree(t, t->nodelist[root].left, spaces + 4);
+}
+
+int main() {
+
+    TREE t;
+    read_tree(&t);
+    print_tree(&t);
+
+    print_rotated_tree(&t, t.root, 0);
+
+    return 0;
+}
+
 
 int init_tree(TREE *t, int capacity) {
     t->capacity = capacity;

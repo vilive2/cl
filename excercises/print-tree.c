@@ -1,3 +1,6 @@
+#include<stdio.h>
+#include<stdlib.h>
+
 typedef struct tnode {
     int d;
     int left, right, parent;
@@ -11,6 +14,32 @@ typedef struct{
 int init_tree(TREE *t, int capacity);
 void read_tree(TREE *t);
 void print_tree(TREE *t);
+
+/*
+print like this
+  ----A----
+  |       |
+--B--     C--
+|   |       |
+D   E       F
+*/
+
+void print_tree_(TREE *t, int root) {
+    if(root == -1) return;
+    printf("%d\n", t->nodelist[root].d);
+    print_tree_(t, t->nodelist[root].left);
+    print_tree_(t, t->nodelist[root].right);
+}
+
+int main() {
+
+    TREE t;
+    read_tree(&t);
+    print_tree(&t);
+    print_tree_(&t, t.root);
+
+    return 0;
+}
 
 int init_tree(TREE *t, int capacity) {
     t->capacity = capacity;

@@ -1,3 +1,6 @@
+#include<stdio.h>
+#include<stdlib.h>
+
 typedef struct tnode {
     int d;
     int left, right, parent;
@@ -11,6 +14,35 @@ typedef struct{
 int init_tree(TREE *t, int capacity);
 void read_tree(TREE *t);
 void print_tree(TREE *t);
+
+int lowest_common_ancestor(TREE *t, int root, int a, int b) {
+    if(root == -1) return -1;
+    if(t->nodelist[root].d == a) return a;
+    if(t->nodelist[root].d == b) return b;
+
+    int left_lca = lowest_common_ancestor(t, t->nodelist[root].left, a, b);
+    int right_lca = lowest_common_ancestor(t, t->nodelist[root].right, a, b);
+
+    if(left_lca != -1 && right_lca != -1) return t->nodelist[root].d;
+
+    return left_lca == -1? right_lca: left_lca;
+}
+
+int main() {
+
+    TREE t;
+    read_tree(&t);
+    print_tree(&t);
+
+    int a, b;
+    scanf("%d%d", &a, &b);
+    printf("%d is lowest common ancestor of %d & %d\n", 
+            lowest_common_ancestor(&t, t.root, a, b), a, b
+        );
+
+    return 0;
+}
+
 
 int init_tree(TREE *t, int capacity) {
     t->capacity = capacity;
