@@ -1,142 +1,138 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
+#include "list.h"
 
-typedef struct {
-    size_t size;
-    size_t capacity;
-    int *arr;
-} LIST;
+int init_list(LIST *list, size_t capacity, size_t element_size) {
+    list->capacity = capacity;
+    list->element_size = element_size;
+    list->size = 0;
+    if(NULL == (list->elements = malloc(capacity*element_size))) {
+        fprintf(stderr, "LIST : INIT, memory allocation failed\n");
+        return -1;
+    }
 
-LIST create_list(void) {
-    LIST new_list;
-    new_list.size = 0;
-    new_list.arr = NULL;
-    return new_list;
+    return 0;
 }
 
-void print_list(LIST L) {
-    printf("[");
-    for(int i = 0; i < L.size; i++) {
-        printf("%d", L.arr[i]);
-        if(i+1 < L.size) {
-            printf(", ");
+int append(LIST *list, const void *element) {
+    if(list->size == list->capacity) {
+        list->capacity = 2 * list->capacity;
+        if(NULL == (list->elements = realloc(list->elements, 
+                list->capacity * list->element_size))) {
+            
+            fprintf(stderr, "LIST : APPEND, memory allocation failed\n");
+            return -1;
         }
+    }
+
+    memcpy(&list->elements[list->size * list->element_size], element, list->element_size);
+    list->size++;
+    return 0;
+}
+
+int insert_at(LIST *list, const void *element, size_t index) {
+    if(index >= list->size) {
+        fprintf("LIST : INSERT_AT, invalid index:%d\n", index);
+        return -1;
+    }
+
+    if(list->size == list->capacity) {
+        list->capacity = 2 * list->capacity;
+        if(NULL == (list->elements = realloc(list->elements, 
+                list->capacity * list->element_size))) {
+            
+            fprintf(stderr, "LIST : INSERT_AT, memory allocation failed\n");
+            return -1;
+        }
+    }
+
+    void *ptr = list->elements + list->size * list->element_size;
+    for(int i = list->size - 1 ; i >= (int)index ; i--) {
+        memcpy(ptr, ptr - list->element_size, list->element_size);
+        ptr -= list->element_size;
+    }
+
+    memcpy(ptr, element, list->element_size);
+    list->size++;
+    return 0; 
+}
+
+void print_list(LIST *list, void (*printer)(const void *)) {
+    printf("[");
+    void *ptr = list->elements;
+    for(int i = 0 ; i < list->size ; i++) {
+        printer(ptr);
+        ptr += list->element_size;
+        if(i+1 < list->size) printf(", ");
     }
     printf("]\n");
 }
 
-LIST append(LIST L, int a) {
-    if(L.size == L.capacity) {
-        L.arr = (int *) realloc(L.arr, sizeof(int)*2*L.capacity);
-        L.capacity = 2*L.capacity;
-    } else {
-        L.arr = (int *) realloc(L.arr, sizeof(int)*L.capacity);
+int find(LIST *list, const void *key) {
+    void *ptr = list->elements;
+    for(int i = 0 ; i < list->size ; i++, ptr += list->element_size) {
+        if(!strncmp(ptr, key, list->element_size)) 
+            return i;
     }
 
-    L.arr[L.size++] = a;
-
-    return L;
+    return -1;
 }
 
-LIST prepend(LIST L, int a) {
-    if(L.size == L.capacity) {
-        L.capacity = 2*L.capacity;
-    }
-    
-    L.arr = (int *) realloc(L.arr, sizeof(int)*L.capacity);
-
-    for(int i = L.size; i > 0; i--) {
-        L.arr[i] = L.arr[i - 1];
+int delete_at(LIST *list, size_t index) {
+    if(index >= list->size) {
+        fprintf("LIST : DELETE_AT, invalid index:%d\n", index);
+        return -1;
     }
 
-    L.arr[0] = a;
-    L.size++;
-
-    return L;
-}
-
-LIST deletelast(LIST L) {
-    if(L.size > 0) {
-        L.arr = (int *) realloc(L.arr, sizeof(int)*L.capacity);
-        L.size--;
+    void *ptr = list->elements + index * list->element_size;
+    for(int i = index ; i < list->size ; i++) {
+        memcpy(ptr, ptr + list->element_size, list->element_size);
+        ptr += list->element_size;
     }
 
-    return L;
-}
+    list->size--;
 
-LIST deletefirst(LIST L) {
-    if(L.size > 0) {
-        L.arr = (int *) realloc(L.arr, sizeof(int)*L.capacity);
-        L.size--;
-        for(int i = 0 ; i < L.size ; i++) 
-            L.arr[i] = L.arr[i+1];
-    }
-
-    return L;
-}
-
-LIST deleteall(LIST L, int a) {
-    if(L.size > 0) {
-        int *arr = (int *) malloc(sizeof(int)*L.capacity);
-        int i = 0 , j = 0;
-        for(; i < L.size ; i++) {
-            if(L.arr[i] != a) {
-                arr[j++] = L.arr[i];
-            }
+    if(!((list->size + 1) & (list->size))) {
+        list->capacity = list->size;
+        if(NULL == (list->elements = realloc(list->elements, list->element_size * list->size))) {
+            fprintf(stderr, "LIST : DELETE_AT, memory removal failed\n");
+            return -1;
         }
-
-        L.arr = arr;
-        L.size = j;
     }
-
-    return L;
-}
-
-int main() {
-    LIST l = create_list();
-    print_list(l);
-    l = append(l, 9);
-    l = append(l, 1);
-    l = append(l, 2);
-    l = append(l, 3);
-    l = append(l, 6);
-    l = append(l, 7);
-    l = append(l, 8);
-    l = append(l, 4);
-    print_list(l);
-
-    l = append(l, 2);
-    l = append(l, 3);
-    l = prepend(l, 9);
-    l = prepend(l, 2);
-    l = prepend(l, 4);
-    l = prepend(l, 8);
-    l = prepend(l, 2);
-    l = prepend(l, 5);
-    l = prepend(l, 9);
-    print_list(l);
-
-    l = prepend(l, 8);
-    l = prepend(l, 9);
-    l = prepend(l, 1);
-    l = deletelast(l);
-    l = deletelast(l);
-    l = deletelast(l);
-    l = deletelast(l);
-    l = deletelast(l);
-    l = deletefirst(l);
-    print_list(l);
-
-    l = deletefirst(l);
-    l = deletefirst(l);
-    l = deletefirst(l);
-    l = deletefirst(l);
-    l = deleteall(l, 7);
-    l = deleteall(l, 2);
-    l = deleteall(l, 9);
-    l = deleteall(l, 4);
-    l = deleteall(l, 7);
-    print_list(l);
 
     return 0;
+}
+
+int deleteall_key(LIST *list, const void *key) {
+    void *ptr = list->elements;
+    int j = 0;
+    for(int i=0; i < list->size ; i++, ptr += list->element_size) {
+        if(strncmp(ptr, key, list->element_size)) {
+            memcpy(list->elements + j * list->element_size, ptr, list->element_size);
+            j++;
+        }
+    }
+
+    list->size = j;
+
+    if(!((list->size + 1) & (list->size))) {
+        list->capacity = list->size;
+        if(NULL == (list->elements = realloc(list->elements, list->element_size * list->size))) {
+            fprintf(stderr, "LIST : DELETEALL_KEY, memory removal failed\n");
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+int deleteall(LIST *list) {
+    list->capacity = 1;
+    if(NULL == (list->elements = realloc(list->elements, list->element_size))) {
+        fprintf(stderr, "LIST : DELETEALL, memory removal failed\n");
+        return -1;
+    }
+    
+    list->size = 0;
 }
