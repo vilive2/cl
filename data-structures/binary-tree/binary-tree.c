@@ -1,9 +1,13 @@
 #include<stdlib.h>
 #include<stdio.h>
-#include "node.h"
+#include<string.h>
+#include "binary-tree.h"
 
 int max(int a, int b) {
     return a>b? a : b;
+}
+int min(int a, int b) {
+    return a>b? b: a;
 }
 
 int height(TREE *t, int root) {
@@ -27,7 +31,7 @@ int leaves(TREE *t, int root) {
 int weight(TREE *t, int root) {
     if(root == -1) return 0;
 
-    return t->nodelist[root].d +
+    return t->nodelist[root].data +
             weight(t, t->nodelist[root].left)+ 
                 weight(t, t->nodelist[root].right);
 }
@@ -35,7 +39,7 @@ int weight(TREE *t, int root) {
 void preorder(TREE *t, int root) {
     if(root == -1) return;
     
-    printf("%d ", t->nodelist[root].d);
+    printf("%d ", t->nodelist[root].data);
     preorder(t, t->nodelist[root].left);
     preorder(t, t->nodelist[root].right);
 }
@@ -44,7 +48,7 @@ void inorder(TREE *t, int root) {
     if(root == -1) return;
 
     inorder(t, t->nodelist[root].left);
-    printf("%d ", t->nodelist[root].d);
+    printf("%d ", t->nodelist[root].data);
     inorder(t, t->nodelist[root].right);
 }
 
@@ -53,45 +57,160 @@ void postorder(TREE *t, int root) {
 
     postorder(t, t->nodelist[root].left);
     postorder(t, t->nodelist[root].right);
-    printf("%d ", t->nodelist[root].d);
+    printf("%d ", t->nodelist[root].data);
 }
 
 int pathsum(TREE *t, int root, int target) {
     if(root == -1) return target == 0;
 
-    target -= t->nodelist[root].d;
+    target -= t->nodelist[root].data;
 
     return pathsum(t, t->nodelist[root].left, target) ||
                 pathsum(t, t->nodelist[root].right, target);
 }
 
+int init_tree(TREE *t, size_t capacity) {
+    t->capacity = capacity;
+    t->num_nodes = 0;
+    t->root = -1;
+    if(NULL == (t->nodelist = (TNODE *)malloc(capacity*sizeof(TNODE)))) {
+        fprintf(stderr, "INIT TREE : memory allocation failed\n");
+        return -1;
+    }
+    
+    return 0;
+}
 
-
-int main() {
-
-    TREE t;
-    read_tree(&t);
-    print_tree(&t);
-
-    printf("height: %d\n", height(&t, t.root));
-    printf("leaves: %d\n", leaves(&t, t.root));
-    printf("weight: %d\n", weight(&t, t.root));
-
-    printf("preorder: ");
-    preorder(&t, t.root);
-    printf("\n");
-
-    printf("inorder: ");
-    inorder(&t, t.root);
-    printf("\n");
-
-    printf("postorder: ");
-    postorder(&t, t.root);
-    printf("\n");
-
-
-    int target = 12;
-    printf("pathsum of %d exist: %d\n", target, pathsum(&t, t.root, target));
+int resize(TREE *t, size_t capacity) {
+    t->capacity = capacity;
+    if(NULL == (t->nodelist = (TNODE *)realloc(t->nodelist, capacity*sizeof(TNODE)))) {
+        fprintf(stderr, "RESIZE TREE : memory allocation failed\n");
+        return -1;
+    }
 
     return 0;
+}
+
+void free_node(TREE *t, int node) {
+    if(t->freelist == -1) {
+        t->nodelist[node].right = -1;
+    } else {
+        t->nodelist[node].right = t->freelist;
+    }
+    t->freelist = node;
+}
+
+void increase_free_list(TREE *t, int base, size_t size) {
+    for(int i = 0 ; i < size ; i++) {
+        free_node(t, base + i);
+    }
+}
+
+int get_free_node(TREE *t) {
+    if(t->freelist == -1) {
+        if(resize(t, t->capacity * 2)) {
+            return -1;
+        }  
+        increase_free_list(t, t->num_nodes, t->num_nodes);
+    }
+
+    int node = t-> freelist;
+    t->freelist = t->nodelist[node].right;
+
+    return node;
+}
+
+void read_tree(TREE *t) {
+    int num_nodes;
+    scanf("%data", &num_nodes);
+    if(init_tree(t, num_nodes) == -1) {
+        fprintf(stderr, "out of memory");
+        exit(0);
+    }
+    t->num_nodes = num_nodes;
+
+    int i;
+    TNODE *node;
+    for(node = t->nodelist, i = 0; i < num_nodes; node++, i++){
+        scanf("%d%d%d", &(node->data), &(node->left), &(node->right));
+        if(node->left != -1) t->nodelist[node->left].parent = i;
+        if(node->right != -1) t->nodelist[node->right].parent = i;
+    }
+    t->root=0;
+}
+
+void print_nodelist(TREE *t) {
+    printf("Tree:\nnum_of_nodes: %ld\n", t->num_nodes);
+    printf("index data left right parent\n");
+    int i;
+    TNODE *node;
+    for(node = t->nodelist, i = 0; i < t->num_nodes; node++, i++)
+        printf("%5d %4d %4d %5d %6d\n", i, (node->data), (node->left), (node->right), (node->parent));
+}
+
+int print_tree_(TREE *t, int root, int line_num, int *line_end, char (*lines)[201]);
+void print_tree(TREE *t, int root) {
+    int h = 2*height(t, root);
+    printf("\nPRINT TREE : %d\n", h);
+    char lines[h+1][201];
+    for(int i = 0 ; i < h+1 ; i++) lines[i][0] = '\0';
+    int line_end = -1;
+    print_tree_(t, root, 0, &line_end, lines);
+
+    for(int i = 0 ; i < h+1 ; i++) {
+        printf("%s\n", lines[i]);
+    }
+}
+
+void fillspace(char *c, int end_index) {
+    int start_index = strlen(c);
+    for(int i = start_index ; i < end_index ; i++)
+        c[i] = ' ';
+    c[end_index] = '\0';
+}
+
+int print_tree_(TREE *t, int root, int line_num, int *line_end, char (*lines)[201]) {
+    if(root == -1) {
+        return -1;
+    }
+
+    int root_index, left_child_index, right_child_index;
+
+    int line_start = strlen(&lines[line_num][0]);
+    fillspace(&(lines[line_num+1][0]), min(200, line_start));
+    
+    left_child_index = print_tree_(t, t->nodelist[root].left, line_num + 2, line_end, lines);
+    for(int i = line_start ; i <= (*line_end) && i < 200 ; i++) {
+        lines[line_num][i] = ' ';
+        if(i>=left_child_index && left_child_index != -1)
+            lines[line_num][i] = '-';
+        
+        lines[line_num+1][i] = ' ';
+        if(i == left_child_index)
+            lines[line_num+1][i] = '|';
+    }
+
+    lines[line_num+1][min(200, ((*line_end)+1))] = '\0'; 
+
+    root_index = (*line_end)+1;
+    *line_end = (*line_end) + 1 + snprintf(&lines[line_num][(*line_end)+1], 200 - min(200, (*line_end)+1) + 1, "%d", t->nodelist[root].data);
+
+    fillspace(&(lines[line_num+1][0]), min(200, *line_end));
+
+    line_start = *line_end;
+    
+    right_child_index = print_tree_(t, t->nodelist[root].right, line_num + 2, line_end, lines);
+    for(int i = line_start ; i <= (*line_end) && i < 200 ; i++) {
+        lines[line_num][i] = ' ';
+        if(i <= right_child_index) 
+            lines[line_num][i] = '-';
+
+        lines[line_num+1][i] = ' ';
+        if(i == right_child_index)
+            lines[line_num+1][i] = '|';
+    }
+    lines[line_num][min(200, (*line_end)+1)] = '\0';
+    lines[line_num+1][min(200, (*line_end)+1)] = '\0';
+
+    return root_index;
 }
