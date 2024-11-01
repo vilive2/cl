@@ -8,11 +8,13 @@ int main() {
 
     TREE t;
     int n;
+    printf("Num of nodes: ");
     scanf("%d", &n);
     if(init_tree(&t, n)) {
         exit(1);
     }
 
+    printf("enter %d node key values: ", n);
     for(int i = 0 ; i < n ; i++) {
         scanf("%d", &(t.nodelist[i].data));
     }
@@ -21,7 +23,7 @@ int main() {
 
     bst_build(&t);
     // print_nodelist(&t);
-    print_tree(&t, t.root);
+    // print_tree(&t, t.root);
     
     // operations
     // INSERT 1 
@@ -29,13 +31,14 @@ int main() {
     // SEARCH 3
     // PRINT 4
     int q, key;
-    scanf("%d", &q);
+    // scanf("%d", &q);
 
-    f(qnum, q) {
+    while(1) {
+        print_tree(&t, t.root);
+        printf("\n\nquery 1(insert), 2(delete), 3(search), exit?");
         int query_type;
         scanf("%d", &query_type);
-        printf("Query %d BEGIN\n", qnum);
-        print_tree(&t, t.root);
+        // printf("Query %d BEGIN\n", qnum);
         switch(query_type) {
             case 1:
                 // INSERT
@@ -57,18 +60,19 @@ int main() {
                 else
                     printf("found\n");
                 break;
-            case 4:
-                // PRINT
-                inorder(&t, t.root);
-                printf("\n");
-                break;
+            // case 4:
+            //     // PRINT
+            //     inorder(&t, t.root);
+            //     printf("\n");
+            //     break;
             default:
                 fprintf(stderr, "invalid operation type: %d\n", query_type);
+                exit(0);
         }
 
         printf("query success!\n");
-        print_tree(&t, t.root);
-        printf("Query %d END\n", qnum);
+        // print_tree(&t, t.root);
+        // printf("Query %d END\n", qnum);
     }
 
     return 0;

@@ -3,70 +3,46 @@
 #include<string.h>
 #include "binary-tree.h"
 
-int max(int a, int b) {
-    return a>b? a : b;
-}
-int min(int a, int b) {
-    return a>b? b: a;
-}
-
 int height(TREE *t, int root) {
     if(root == -1) return 0;
     if(t->nodelist[root].left == -1 && 
         t->nodelist[root].right == -1) return 0;
 
-    return 1 + max(height(t, t->nodelist[root].left), 
-                    height(t, t->nodelist[root].right));
+    int left_subtree_height = height(t, t->nodelist[root].left);
+    int right_subtree_height = height(t, t->nodelist[root].right);
+    int curr_subtree_height = left_subtree_height + 1;
+
+    if(right_subtree_height > left_subtree_height) 
+        curr_subtree_height = right_subtree_height + 1;
+
+    return curr_subtree_height;
 }
 
-int leaves(TREE *t, int root) {
-    if(root == -1) return 0;
-    if(t->nodelist[root].left == -1 && 
-        t->nodelist[root].right == -1) return 1;
-
-    return leaves(t, t->nodelist[root].left)+ 
-                    leaves(t, t->nodelist[root].right);
-}
-
-int weight(TREE *t, int root) {
-    if(root == -1) return 0;
-
-    return t->nodelist[root].data +
-            weight(t, t->nodelist[root].left)+ 
-                weight(t, t->nodelist[root].right);
-}
-
-void preorder(TREE *t, int root) {
+void preorder(TREE *t, int root, int *dest, int *cur_index) {
     if(root == -1) return;
     
-    printf("%d ", t->nodelist[root].data);
-    preorder(t, t->nodelist[root].left);
-    preorder(t, t->nodelist[root].right);
+    dest[*cur_index] = t->nodelist[root].data;
+    *cur_index = *cur_index + 1;
+    preorder(t, t->nodelist[root].left, dest, cur_index);
+    preorder(t, t->nodelist[root].right, dest, cur_index);
 }
 
-void inorder(TREE *t, int root) {
+void inorder(TREE *t, int root, int *dest, int *cur_index) {
     if(root == -1) return;
 
-    inorder(t, t->nodelist[root].left);
-    printf("%d ", t->nodelist[root].data);
-    inorder(t, t->nodelist[root].right);
+    inorder(t, t->nodelist[root].left, dest, cur_index);
+    dest[*cur_index] = t->nodelist[root].data;
+    *cur_index = *cur_index + 1;
+    inorder(t, t->nodelist[root].right, dest, cur_index);
 }
 
-void postorder(TREE *t, int root) {
+void postorder(TREE *t, int root, int *dest, int *cur_index) {
     if(root == -1) return;
 
-    postorder(t, t->nodelist[root].left);
-    postorder(t, t->nodelist[root].right);
-    printf("%d ", t->nodelist[root].data);
-}
-
-int pathsum(TREE *t, int root, int target) {
-    if(root == -1) return target == 0;
-
-    target -= t->nodelist[root].data;
-
-    return pathsum(t, t->nodelist[root].left, target) ||
-                pathsum(t, t->nodelist[root].right, target);
+    postorder(t, t->nodelist[root].left, dest, cur_index);
+    postorder(t, t->nodelist[root].right, dest, cur_index);
+    dest[*cur_index] = t->nodelist[root].data;
+    *cur_index = *cur_index + 1;
 }
 
 int init_tree(TREE *t, size_t capacity) {
@@ -74,7 +50,6 @@ int init_tree(TREE *t, size_t capacity) {
     t->num_nodes = 0;
     t->root = -1;
     if(NULL == (t->nodelist = (TNODE *)malloc(capacity*sizeof(TNODE)))) {
-        fprintf(stderr, "INIT TREE : memory allocation failed\n");
         return -1;
     }
     
@@ -84,7 +59,6 @@ int init_tree(TREE *t, size_t capacity) {
 int resize(TREE *t, size_t capacity) {
     t->capacity = capacity;
     if(NULL == (t->nodelist = (TNODE *)realloc(t->nodelist, capacity*sizeof(TNODE)))) {
-        fprintf(stderr, "RESIZE TREE : memory allocation failed\n");
         return -1;
     }
 
@@ -146,6 +120,10 @@ void print_nodelist(TREE *t) {
     TNODE *node;
     for(node = t->nodelist, i = 0; i < t->num_nodes; node++, i++)
         printf("%5d %4d %4d %5d %6d\n", i, (node->data), (node->left), (node->right), (node->parent));
+}
+
+int min(int a, int b) {
+    return a>b? b: a;
 }
 
 int print_tree_(TREE *t, int root, int line_num, int *line_end, char (*lines)[201]);

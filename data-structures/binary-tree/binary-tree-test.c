@@ -1,3 +1,28 @@
+int pathsum(TREE *t, int root, int target) {
+    if(root == -1) return target == 0;
+
+    target -= t->nodelist[root].data;
+
+    return pathsum(t, t->nodelist[root].left, target) ||
+                pathsum(t, t->nodelist[root].right, target);
+}
+
+int weight(TREE *t, int root) {
+    if(root == -1) return 0;
+
+    return t->nodelist[root].data +
+            weight(t, t->nodelist[root].left)+ 
+                weight(t, t->nodelist[root].right);
+}
+
+int leaves(TREE *t, int root) {
+    if(root == -1) return 0;
+    if(t->nodelist[root].left == -1 && 
+        t->nodelist[root].right == -1) return 1;
+
+    return leaves(t, t->nodelist[root].left)+ 
+                    leaves(t, t->nodelist[root].right);
+}
 
 int main() {
 
