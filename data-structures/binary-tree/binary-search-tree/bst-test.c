@@ -50,7 +50,7 @@ int main() {
                 // DELETE
                 scanf("%d", &key);
                 printf("\n=>DELETE %d\n", key);
-                bst_delete(&t, t.root, key);
+                bst_delete(&t, key);
                 break;
             case 3:
                 // SEARCH

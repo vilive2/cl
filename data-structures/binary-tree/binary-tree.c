@@ -46,26 +46,21 @@ void postorder(TREE *t, int root, int *dest, int *cur_index) {
 }
 
 int init_tree(TREE *t, size_t capacity) {
-    t->capacity = capacity + 1;
+    t->capacity = capacity;
     t->num_nodes = 0;
     t->root = -1;
-    if(NULL == (t->nodelist = (TNODE *)malloc(capacity*sizeof(TNODE)))) {
+    if(NULL == (t->nodelist = (TNODE *)malloc(t->capacity*sizeof(TNODE)))) {
         return -1;
     }
-
-
-    for(int i = 0 ; i < capacity ; i++)
-        t->nodelist[i].right = i + 1;
-
-    t->nodelist[capacity].right = -1;
-    t->freelist = 0;
     
     return 0;
 }
 
 int resize(TREE *t, size_t capacity) {
     t->capacity = capacity;
-    if(NULL == (t->nodelist = (TNODE *)realloc(t->nodelist, capacity*sizeof(TNODE)))) {
+    size_t next_size = capacity * sizeof(TNODE);
+    printf("\n next cap: %ld * %ld\n", capacity, sizeof(TNODE));
+    if(NULL == (t->nodelist = (TNODE *)realloc(t->nodelist, next_size))) {
         return -1;
     }
 

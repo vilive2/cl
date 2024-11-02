@@ -92,110 +92,93 @@ int bst_search(TREE *t, int key) {
     return cur;
 }
 
-int bst_minimum(TREE *t, int root) {
-    if(root == -1) 
-        return -1;
-
-    if(t->nodelist[root].left == -1) {
-        return root;
-    } 
-
-    return bst_minimum(t, t->nodelist[root].left);
-}
-
 int bst_successor(TREE *t, int root) {
     if(root == -1)
         return -1;
 
-    if(t->nodelist[root].right == -1) {
-        return -1;
+    int par = t->nodelist[root].right;
+    int cur = par;
+
+    while(cur != -1) {
+        par = cur;
+        cur = t->nodelist[cur].left;
     }
 
-    return bst_minimum(t, t->nodelist[root].right);
+    return par;
 }
 
-void delete(TREE *t, int node);
+void delete_casea(TREE *t, int key_index) {
+    TNODE *par_node, *key_node, *child_node;
+    key_node = &(t->nodelist[key_index]);
+    int par = key_node->parent, child = key_node->left;
+    if(child == -1)
+        child = key_node->right;
+    if(par != -1)
+        par_node = &(t->nodelist[par]);
+    if(child != -1)
+        child_node = &(t->nodelist[child]);
 
-void bst_delete(TREE *t, int root, int key) {
-    if(root == -1) {
-        fprintf(stderr, "%d not found\n", key);
+    key_node->left = -1;
+    key_node->right = -1;
+    key_node->parent = -1;
+
+    if(par != -1) {
+        if(key_index == par_node->left)
+            par_node->left = child;
+        else 
+            par_node->right = child;
+    } else 
+        t->root = child;
+
+    if(child != -1) 
+        child_node->parent = par;
+}
+
+void delete_caseb(TREE *t, int key_index) {
+    int par, succ_index = bst_successor(t, key_index);
+    delete_casea(t, succ_index);
+    
+    TNODE *par_node, *key_node, *left_node, *right_node, *succ_node;
+    key_node = &(t->nodelist[key_index]);
+    par = key_node->parent;
+    if(par != -1) 
+        par_node = &(t->nodelist[par]);
+
+    left_node = &(t->nodelist[key_node->left]);
+    right_node = &(t->nodelist[key_node->right]);
+    succ_node = &(t->nodelist[succ_index]);
+
+    succ_node->left = key_node->left;
+    left_node->parent = succ_index;
+    succ_node->right = key_node->right;
+    right_node->parent = succ_index;
+    succ_node->parent = par;
+
+    key_node->left = -1;
+    key_node->right = -1;
+    key_node->parent = -1;
+
+    if(par != -1) {
+        if(key_index == par_node->left)
+            par_node->left = succ_index;
+        else 
+            par_node->right = succ_index;
+    } else
+        t->root = succ_index;
+}
+
+void bst_delete(TREE *t, int key) {
+    int key_index = bst_search(t, key);
+    if(key_index == -1) {
         return;
     }
 
-    if(t->nodelist[root].data == key) {
-        delete(t, root);
-    } else if(t->nodelist[root].data < key) {
-        bst_delete(t, t->nodelist[root].right, key);
-    } else {
-        bst_delete(t, t->nodelist[root].left, key);
-    }
-}
+    TNODE *key_node = &(t->nodelist[key_index]);
+    if(key_node->left != -1 && key_node->right != -1)
+        delete_caseb(t, key_index);
+    else
+        delete_casea(t, key_index);
 
-void detach_successor(TREE *t, int succ_index) {
-    TNODE *succ = &(t->nodelist[succ_index]);
-    TNODE *parent = &(t->nodelist[succ->parent]);
-    if(parent->left == succ_index) {
-        parent->left = succ->right;
-    } else {
-        parent->right = succ->right;
-    }
-
-    if(succ->right != -1)
-        t->nodelist[succ->right].parent = succ->parent;
-}
-
-void delete(TREE *t, int node_index) {
-    int replacer = -1;
-
-    TNODE *node = &(t->nodelist[node_index]);
-    TNODE *left = NULL, *right = NULL, *parent = NULL;
-    if(node->parent != -1) {
-        parent = &(t->nodelist[node->parent]);
-    }
-    if(node->left != -1) {
-        left = &(t->nodelist[node->left]);
-    }
-
-    if(node->right != -1) {
-        right = &(t->nodelist[node->right]);
-    }
-
-    // case 1 both child
-    if(node->left != -1 && node->right != -1) {
-        replacer = bst_successor(t, node_index);
-        detach_successor(t, replacer);
-    }
-    // case 2 single child
-    else if(node->left == -1) {
-        replacer = node->right;
-    } else if(node->right == -1) {
-        replacer = node->left;
-    }
-
-    // fix link
-    if(left) {
-        left->parent = replacer;
-        t->nodelist[replacer].left = node->left;
-    }
-
-    if(right) {
-        right->parent = replacer;
-        t->nodelist[replacer].right = node->right;
-    }
-
-
-    if(replacer != -1)
-        t->nodelist[replacer].parent = node->parent;
-    if(node->parent == -1) {
-        t->root = replacer;
-    } else {
-        if(node_index == parent->left) {
-            parent->left = replacer;
-        } else {
-            parent->right = replacer;
-        }
-    }
-
-    // ADD node to freelist
-    free_node(t, node_index);
+    free_node(t, key_index);
+    t->num_nodes--;
 }
