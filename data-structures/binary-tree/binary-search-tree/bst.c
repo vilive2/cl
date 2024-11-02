@@ -78,17 +78,18 @@ void bst_insert_(TREE *t, int key_index) {
     node->parent = par;
 }
 
-int bst_search(TREE *t, int root, int key) {
-    if(root == -1) 
-        return -1;
-
-    if(t->nodelist[root].data == key) {
-        return root;
-    } else if(t->nodelist[root].data > key) {
-        return bst_search(t, t->nodelist[root].left, key);
+int bst_search(TREE *t, int key) {
+    int cur = t->root;
+    while(cur != -1) {
+        if(t->nodelist[cur].data == key) 
+            break;
+        else if(t->nodelist[cur].data < key) 
+            cur = t->nodelist[cur].right;
+        else 
+            cur = t->nodelist[cur].left;
     }
-    
-    return bst_search(t, t->nodelist[root].right, key);
+
+    return cur;
 }
 
 int bst_minimum(TREE *t, int root) {

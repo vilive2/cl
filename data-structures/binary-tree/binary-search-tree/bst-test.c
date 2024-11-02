@@ -55,7 +55,7 @@ int main() {
             case 3:
                 // SEARCH
                 scanf("%d", &key);
-                if(bst_search(&t, t.root, key) < 0)
+                if(bst_search(&t, key) < 0)
                     printf("key not found\n");
                 else
                     printf("found\n");
