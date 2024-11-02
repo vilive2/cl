@@ -19,7 +19,7 @@ int main() {
         scanf("%d", &(t.nodelist[i].data));
     }
 
-    t.num_nodes = t.capacity;
+    t.num_nodes = n;
 
     bst_build(&t);
     // print_nodelist(&t);
@@ -44,7 +44,7 @@ int main() {
                 // INSERT
                 scanf("%d", &key);
                 printf("\n=>INSERT %d\n", key);
-                bst_insert(&t, t.root, key);
+                bst_insert(&t, key);
                 break;
             case 2:
                 // DELETE
@@ -71,6 +71,7 @@ int main() {
         }
 
         printf("query success!\n");
+        print_nodelist(&t);
         // print_tree(&t, t.root);
         // printf("Query %d END\n", qnum);
     }

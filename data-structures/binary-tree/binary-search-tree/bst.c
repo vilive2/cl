@@ -3,7 +3,7 @@
 #include "../binary-tree.h"
 #include "bst.h"
 
-void bst_insert_(TREE *t, int root, int key_index);
+void bst_insert_(TREE *t, int key_index);
 
 void bst_build(TREE *t) {
     if(t->num_nodes == 0) {
@@ -18,13 +18,15 @@ void bst_build(TREE *t) {
     for(int i = 1 ; i < t->num_nodes ; i++) {
         t->nodelist[i].left = -1;
         t->nodelist[i].right = -1;
-        bst_insert_(t, t->root, i);
+        bst_insert_(t, i);
     }
 
-    t->freelist = -1;
+    t->freelist = t->num_nodes;
+    if(t->num_nodes == t->capacity) 
+        t->freelist = -1;
 }
 
-void bst_insert(TREE *t, int root, int key) {
+void bst_insert(TREE *t, int key) {
     int key_index = get_free_node(t);
     if(key_index<0) {
         return;
@@ -34,31 +36,46 @@ void bst_insert(TREE *t, int root, int key) {
     t->nodelist[key_index].right = -1;
     t->nodelist[key_index].data = key;
 
-    bst_insert_(t, root, key_index);
+    bst_insert_(t, key_index);
+    t->num_nodes++;
 }
 
-void bst_insert_(TREE *t, int root, int key_index) {
-    if(root == -1) {
+void bst_insert_(TREE *t, int key_index) {
+    if(t->root == -1) {
         t->root = key_index;
-        t->nodelist[key_index].parent = root;
+        t->nodelist[key_index].parent = -1;
         return;
     }
 
-    if(t->nodelist[root].data < t->nodelist[key_index].data) {
-        if(t->nodelist[root].right == -1) {
-            t->nodelist[root].right = key_index;
-            t->nodelist[key_index].parent = root;
+    int par = t->root;
+    TNODE *node = &(t->nodelist[key_index]);
+    int key = node->data;
+    TNODE *cur = &(t->nodelist[par]);
+    
+    while(1) {
+        if(cur->data < key) {
+            if(cur->right != -1) 
+                par = cur->right;
+            else 
+                break;
         } else {
-            bst_insert_(t, t->nodelist[root].right, key_index);
+            if(cur->left != -1)
+                par = cur->left;
+            else
+                break;
         }
-    } else {
-        if(t->nodelist[root].left == -1) {
-            t->nodelist[root].left = key_index;
-            t->nodelist[key_index].parent = root;
-        } else {
-            bst_insert_(t, t->nodelist[root].left, key_index);
-        }
+
+        cur = &(t->nodelist[par]);
     }
+
+    if(cur->data < key) {
+        // INSERT RIGHT
+        cur->right = key_index;
+    } else {
+        // INSERT LEFT
+        cur->left = key_index;
+    }
+    node->parent = par;
 }
 
 int bst_search(TREE *t, int root, int key) {

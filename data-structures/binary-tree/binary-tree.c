@@ -46,12 +46,19 @@ void postorder(TREE *t, int root, int *dest, int *cur_index) {
 }
 
 int init_tree(TREE *t, size_t capacity) {
-    t->capacity = capacity;
+    t->capacity = capacity + 1;
     t->num_nodes = 0;
     t->root = -1;
     if(NULL == (t->nodelist = (TNODE *)malloc(capacity*sizeof(TNODE)))) {
         return -1;
     }
+
+
+    for(int i = 0 ; i < capacity ; i++)
+        t->nodelist[i].right = i + 1;
+
+    t->nodelist[capacity].right = -1;
+    t->freelist = 0;
     
     return 0;
 }
@@ -82,10 +89,10 @@ void increase_free_list(TREE *t, int base, size_t size) {
 
 int get_free_node(TREE *t) {
     if(t->freelist == -1) {
-        if(resize(t, t->capacity * 2)) {
+        if(resize(t, 1 + t->capacity * 2)) {
             return -1;
         }  
-        increase_free_list(t, t->num_nodes, t->num_nodes);
+        increase_free_list(t, t->num_nodes, 1 + t->num_nodes);
     }
 
     int node = t-> freelist;
