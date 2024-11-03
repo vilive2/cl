@@ -1,5 +1,5 @@
-#ifndef _GSTACK_
-#define _GSTACK_
+#ifndef _STACK_
+#define _STACK_
 
 typedef struct {
     void *elements;
@@ -11,4 +11,4 @@ int stack_push(STACK *s, const void *eptr);
 int stack_pop(STACK *s, void *eptr);
 int stack_top(STACK *s, void *eptr);
 
-#endif // _GSTACK_
+#endif // _STACK_

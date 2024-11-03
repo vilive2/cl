@@ -1,4 +1,5 @@
 #ifndef _QUEUE_
+#define _QUEUE_
 
 typedef struct {
     void *elements;

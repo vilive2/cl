@@ -1,18 +1,15 @@
-#ifndef _LISTH_
-#define _LISTH_
+#ifndef _LIST_
+#define _LIST_
 
 typedef struct {
     void *elements;
-    size_t capacity, size, element_size;
+    size_t capacity, size, esize;
 } LIST;
 
-int init_list(LIST *list, size_t capacity, size_t element_size);
-int append(LIST *list, const void *element);
-int insert_at(LIST *list, const void *element, size_t index);
-void print_list(LIST *list, void (*printer)(const void *));
-int find(LIST *list, const void *key);
-int delete_at(LIST *list, size_t index);
-int deleteall_key(LIST *list, const void *key);
-int deleteall(LIST *list);
+int list_init(LIST *list, size_t size, size_t esize);
+int list_append(LIST *list, const void *eptr);
+int list_pop(LIST *list, void *eptr);
+int list_get(LIST *list, void *eptr, size_t index);
+int list_set(LIST *list, const void *eptr, size_t index);
 
-#endif
+#endif // _LIST_
