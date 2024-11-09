@@ -1,10 +1,9 @@
 #ifndef _BST_
 #define _BST_
+#define DEBUG
 
-void bst_build(TREE *t);
-int bst_search(TREE *t, int key);
-void bst_insert(TREE *t, int key);
-int bst_successor(TREE *t, int root);
-void bst_delete(TREE *t, int key);
+int bst_search(TREE *t, DATA key);
+int bst_insert(TREE *t, DATA key);
+int bst_delete(TREE *t, DATA key);
 
 #endif // _BST_

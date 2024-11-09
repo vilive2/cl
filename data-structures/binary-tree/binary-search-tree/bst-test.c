@@ -6,22 +6,28 @@
 
 int main() {
 
-    TREE t;
+    TREE tree;
     int n;
+    if(init_tree(&tree)) {
+        printf("Failed to init, required capacity : %d\n", MAX_NODES);
+        exit(1);
+    } else {
+        printf("Tree initialized.\n");
+    }
+    
     printf("Num of nodes: ");
     scanf("%d", &n);
-    if(init_tree(&t, n)) {
-        exit(1);
-    }
 
     printf("enter %d node key values: ", n);
     for(int i = 0 ; i < n ; i++) {
-        scanf("%d", &(t.nodelist[i].data));
+        int key;
+        scanf("%d", &key);
+        if(bst_insert(&tree, key)) {
+            printf("Failed to insert, capacity : %ld, size : %ld\n", tree.capacity, tree.size);
+            exit(1);
+        }
     }
 
-    t.num_nodes = n;
-
-    bst_build(&t);
     // print_nodelist(&t);
     // print_tree(&t, t.root);
     
@@ -30,11 +36,10 @@ int main() {
     // DELETE 2
     // SEARCH 3
     // PRINT 4
-    int q, key;
-    // scanf("%d", &q);
-
+    int key;
+    
     while(1) {
-        print_tree(&t, t.root);
+        print_tree(&tree, tree.root);
         printf("\n\nquery 1(insert), 2(delete), 3(search), exit?");
         int query_type;
         scanf("%d", &query_type);
@@ -44,18 +49,18 @@ int main() {
                 // INSERT
                 scanf("%d", &key);
                 printf("\n=>INSERT %d\n", key);
-                bst_insert(&t, key);
+                bst_insert(&tree, key);
                 break;
             case 2:
                 // DELETE
                 scanf("%d", &key);
                 printf("\n=>DELETE %d\n", key);
-                bst_delete(&t, key);
+                bst_delete(&tree, key);
                 break;
             case 3:
                 // SEARCH
                 scanf("%d", &key);
-                if(bst_search(&t, key) < 0)
+                if(bst_search(&tree, key) < 0)
                     printf("key not found\n");
                 else
                     printf("found\n");
@@ -71,7 +76,7 @@ int main() {
         }
 
         printf("query success!\n");
-        print_nodelist(&t);
+        print_nodelist(&tree);
         // print_tree(&t, t.root);
         // printf("Query %d END\n", qnum);
     }
