@@ -64,7 +64,7 @@ void delete_caseb(TREE *tree, int key_index) {
         tree->root = succ_index;
 }
 
-int bst_delete_(TREE *tree, int key) {
+int bst_delete_(TREE *tree, void *key) {
     int key_index = bst_search(tree, key);
     if(key_index == -1) {
         return -1;

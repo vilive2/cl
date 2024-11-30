@@ -10,11 +10,10 @@ void bst_insert_(TREE *tree, int key_index) {
 
     int par = tree->root;
     TNODE *node = &(tree->nodelist[key_index]);
-    int key = node->data;
     TNODE *cur = &(tree->nodelist[par]);
     
     while(1) {
-        if(cur->data < key) {
+        if(tree->comp(cur->data , node->data) < 0 ) {
             if(cur->right != -1) 
                 par = cur->right;
             else 
@@ -29,7 +28,7 @@ void bst_insert_(TREE *tree, int key_index) {
         cur = &(tree->nodelist[par]);
     }
 
-    if(cur->data < key) {
+    if(tree->comp(cur->data, node->data) < 0) {
         // INSERT RIGHT
         cur->right = key_index;
     } else {

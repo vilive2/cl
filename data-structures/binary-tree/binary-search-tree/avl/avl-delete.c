@@ -6,15 +6,16 @@
 extern int balance(TREE *tree, int root_index);
 extern int bst_successor(TREE *tree, int root_index);
 
-int bst_avl_delete_(TREE *tree, int root_index, int key, int *key_index) {
+int bst_avl_delete_(TREE *tree, int root_index, DATA key, int *key_index) {
     if(root_index == -1) {
         *key_index = -1;
         return -1;
     }
 
-    if( key < tree->nodelist[root_index].data ) {
+    int r = tree->comp(key, tree->nodelist[root_index].data);
+    if( r < 0 ) {
         tree->nodelist[root_index].left = bst_avl_delete_(tree, tree->nodelist[root_index].left, key, key_index);
-    } else if(key > tree->nodelist[root_index].data) {
+    } else if( r > 0 ) {
         tree->nodelist[root_index].right = bst_avl_delete_(tree, tree->nodelist[root_index].right, key, key_index);
     } else {
         *key_index = root_index;

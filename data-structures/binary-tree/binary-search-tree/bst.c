@@ -1,5 +1,5 @@
 #include<stddef.h>
-#include<stdio.h>
+#include<string.h>
 #include "../binary-tree.h"
 #include "bst.h"
 
@@ -24,9 +24,10 @@ extern int bst_delete_(TREE *tree, DATA key);
 int bst_search(TREE *tree, DATA key) {
     int cur = tree->root;
     while(cur != -1) {
-        if(tree->nodelist[cur].data == key) 
+        int r = tree->comp(tree->nodelist[cur].data, key);
+        if( r == 0 ) 
             break;
-        else if(tree->nodelist[cur].data < key) 
+        else if(r < 0) 
             cur = tree->nodelist[cur].right;
         else 
             cur = tree->nodelist[cur].left;
@@ -36,18 +37,14 @@ int bst_search(TREE *tree, DATA key) {
 }
 
 int bst_insert(TREE *tree, DATA key) {
-    #ifdef DEBUG
-    printf("insert process begin\n");
-    #endif
     int key_index = get_free_node(tree);
     if(key_index<0) {
         return -1;
     }
 
-
     tree->nodelist[key_index].left = -1;
     tree->nodelist[key_index].right = -1;
-    tree->nodelist[key_index].data = key;
+    memcpy(tree->nodelist[key_index].data, key, tree->key_size);
 
     bst_insert_(tree, key_index);
     tree->size++;

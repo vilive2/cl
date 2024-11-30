@@ -3,7 +3,7 @@
 #include "../bst.h"
 
 extern int bst_avl_insert_(TREE *tree, int root_index, int key_index);
-extern int bst_avl_delete_(TREE *tree, int root_index, int key, int *key_index);
+extern int bst_avl_delete_(TREE *tree, int root_index, DATA key, int *key_index);
 
 void bst_insert_(TREE *tree, int key_index) {
     tree->nodelist[key_index].height = 0;
