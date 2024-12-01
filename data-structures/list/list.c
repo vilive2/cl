@@ -1,28 +1,32 @@
 #include<stdlib.h>
 #include<string.h>
+#include<assert.h>
 #include "list.h"
 
-int list_init(LIST *list, size_t size, size_t esize) {
-    list->capacity = size;
-    list->esize = esize;
+int list_init(LIST *list, size_t key_size, size_t size) {
+    assert(list != NULL);
+    assert(key_size != 0);
+    
+    list->capacity = 1 + size;
+    list->key_size = key_size;
     list->size = size;
-    if(NULL == (list->elements = malloc(size*esize))) 
+    if(NULL == (list->keys = malloc(list->capacity*key_size))) 
         return -1;
 
     return 0;
 }
 
-int list_append(LIST *list, const void *eptr) {
+int list_append(LIST *list, const void *key) {
     if(list->size == list->capacity) {
         list->capacity = 2 * list->capacity;
         if(list->capacity == 0)
             list->capacity = 1;
-        if(NULL == (list->elements = realloc(list->elements, 
-                list->capacity * list->esize)))
+        if(NULL == (list->keys = realloc(list->keys, 
+                list->capacity * list->key_size)))
             return -1;
     }
 
-    if( NULL == memcpy(list->elements + list->size * list->esize, eptr, list->esize) ) 
+    if( NULL == memcpy(list->keys + list->size * list->key_size, key, list->key_size) ) 
         return -1;
 
     list->size++;
@@ -30,32 +34,32 @@ int list_append(LIST *list, const void *eptr) {
     return 0;
 }
 
-int list_pop(LIST *list, void *eptr) {
+int list_pop(LIST *list, void *key) {
     if(list->size == 0) 
         return -1;
 
     list->size--;
-    if(NULL == memcpy(eptr, list->elements + list->size * list->esize, list->esize) ) 
+    if(NULL == memcpy(key, list->keys + list->size * list->key_size, list->key_size) ) 
         return -1;
 
     return 0;
 }
 
-int list_get(LIST *list, void *eptr, size_t index) {
+int list_get(LIST *list, void *key, size_t index) {
     if(list->size <= index) 
         return -1;
 
-    if(NULL == memcpy(eptr, list->elements + index * list->esize, list->esize) ) 
+    if(NULL == memcpy(key, list->keys + index * list->key_size, list->key_size) ) 
         return -1;
 
     return 0;
 }
 
-int list_set(LIST *list, const void *eptr, size_t index) {
+int list_set(LIST *list, const void *key, size_t index) {
     if(list->size <= index) 
         return -1;
 
-    if(NULL == memcpy(list->elements + index * list->esize, eptr, list->esize) )
+    if(NULL == memcpy(list->keys + index * list->key_size, key, list->key_size) )
         return -1;
 
     return 0;

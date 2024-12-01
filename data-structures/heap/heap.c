@@ -1,86 +1,104 @@
 #include<stdlib.h>
-#include<stdio.h>
-#include<limits.h>
+#include<string.h>
+#include<assert.h>
+#include "heap.h"
 
-#define LEFT(i) 2*(i)+1
-#define RIGHT(i) 2*(i)+2
-#define PARENT(i) ((i)-1)/2
+int heap_init(HEAP *pq, size_t key_size, size_t capacity, int (*comp)(const void *, const void *)) {
+    assert(pq != NULL);
+    assert(key_size != 0);
+    assert(capacity != 0);
+    assert(comp != NULL);
+    
+    pq->key_size = key_size;
+    pq->size = 0;
+    pq->capacity = capacity;
+    pq->comp = comp;
 
-void swap(int *a, int *b) {
-    int tmp = *a;
-    *a = *b;
-    *b = tmp;
-}
-
-void min_heapify(int *a, int i, int n) {
-    int l = LEFT(i), r = RIGHT(i), smallest;
-
-    if(l<n && a[l] < a[i]) smallest = l;
-    else smallest = i;
-
-    if(r<n && a[r] < a[smallest]) smallest = r;
-
-    if(smallest != i) {
-        swap(&a[i], &a[smallest]);
-        min_heapify(a, smallest, n);
-    }
-}
-
-void make_heap(int *a, int n) {
-    for(int i=n/2; i>=0; i--) {
-        min_heapify(a, i, n);
-    }
-}
-
-int minimum(int *a, int n) {
-    if(n == 0) {
-        fprintf(stderr, "underflow");
+    if(NULL == (pq->keys = malloc(capacity * key_size)))
         return -1;
-    }
 
-    return a[0];
+    return 0;
 }
 
-int extract_min(int *a, int *n) {
-    if(*n == 0) {
-        fprintf(stderr, "underflow");
+int heap_push(HEAP *pq, const void *eptr) {
+    if(pq->size == pq->capacity)
         return -1;
+
+    int i = pq->size;
+    int par = (i - 1) / 2;
+    void *iptr = pq->keys + i * pq->key_size;
+    void *parptr = pq->keys + par * pq->key_size;
+    
+    while( i>0 && pq->comp(eptr, parptr) < 0 ) {
+        if(NULL == memmove(iptr, parptr, pq->key_size))
+            return -1;
+
+        i = par;
+        par = (i - 1) / 2;
+        iptr = parptr;
+        parptr = pq->keys + par * pq->key_size;
     }
 
-    int min = a[0];
-    a[0] = a[(*n)-1];
-    *n = (*n) -1;
+    if( NULL == memcpy(iptr, eptr, pq->key_size) ) 
+        return -1;
 
-    min_heapify(a, 0, *n);
+    pq->size++;
 
-    return min;
+    return 0;
 }
 
-void decrease_key(int *a, int i, int key, int n) {
-    if(i<0 || i>=n || key>a[i]) {
-        fprintf(stderr, "invalid op");
-        return;
+int heapify_down(HEAP *pq, int i) {
+    int l = 2 * i + 1, r = 2 * i + 2;
+    int child = i;
+    if( l < pq->size) {
+        if(pq->comp(pq->keys + l * pq->key_size, pq->keys + i * pq->key_size) < 0) 
+            child = l;
     }
 
-    int parent = PARENT(i);
-    while(i>0 && a[parent]>key) {
-        i = parent;
-        parent = PARENT(i);
+    if( r < pq->size ) {
+        if(pq->comp(pq->keys + r * pq->key_size, pq->keys + child * pq->key_size) < 0) 
+            child = r;
     }
-    a[i] = key;
+
+    if(child != i) {
+        if(NULL == memcpy(pq->keys + pq->size * pq->key_size, pq->keys + i * pq->key_size, pq->key_size))
+            return -1;
+
+        if(NULL == memcpy(pq->keys + i * pq->key_size, pq->keys + child * pq->key_size, pq->key_size))
+            return -1;
+        
+        if(NULL == memcpy(pq->keys + child * pq->key_size, pq->keys + pq->size * pq->key_size, pq->key_size))
+            return -1;
+
+        return heapify_down(pq, child);
+    }
+
+    return 0;
 }
 
-void insert(int **a, int key, int *n, int *cap) {
-    if(*n == *cap) {
-        *cap = (*cap) * 2;
-        *a = (int *)realloc(*a, (*cap) * sizeof(int));
-        if(*a == NULL) {
-            fprintf(stderr, "memory full");
-            return;
-        }
-    }
+int heap_pop(HEAP *pq, void *eptr) {
+    if(pq->size == 0)
+        return -1;
 
-    *n = (*n)+1;
-    *a[(*n)-1] = INT_MAX;
-    decrease_key(*a, (*n)-1, key, *n);
+    if( NULL == memcpy(eptr, pq->keys, pq->key_size) )
+        return -1;
+
+
+
+    pq->size--;
+
+    if(NULL == memcpy(pq->keys, pq->keys + pq->size * pq->key_size, pq->key_size))
+        return -1;
+
+    return heapify_down(pq, 0);
+}
+
+int heap_top(HEAP *pq, void *eptr) {
+    if(pq->size == 0)
+        return -1;
+
+    if( NULL == memcpy(eptr, pq->keys, pq->key_size) )
+        return -1;
+
+    return 0;
 }

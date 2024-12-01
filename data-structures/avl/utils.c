@@ -22,7 +22,7 @@ void inorder(TREE *tree, int root, void **dest) {
     if(root == -1) return;
 
     inorder(tree, tree->nodelist[root].left, dest);
-    memcpy(*dest, tree->nodelist[root].data, tree->key_size);
+    memcpy(*dest, tree->nodelist[root].key, tree->key_size);
     *dest = (*dest) + tree->key_size;
     inorder(tree, tree->nodelist[root].right, dest);
 }
@@ -56,12 +56,12 @@ int resize(TREE *tree) {
         return -1;
     } 
 
-    void *dataptr = tree->nodelist[0].data;
+    void *dataptr = tree->nodelist[0].key;
     if(NULL == (dataptr = realloc(dataptr, new_cap * tree->key_size))) {
         return -1;
     }
     for(int i = 0 ; i < new_cap ; i++) {
-        tree->nodelist[i].data = dataptr;
+        tree->nodelist[i].key = dataptr;
         dataptr = dataptr + tree->key_size;
     }
 
@@ -126,7 +126,7 @@ int print_tree_(TREE *tree, int root, int line_num, int *line_end, char (*lines)
     lines[line_num+1][min(200, ((*line_end)+1))] = '\0'; 
 
     root_index = (*line_end)+1;
-    *line_end = (*line_end) + 1 + snprintf(&lines[line_num][(*line_end)+1], 200 - min(200, (*line_end)+1) + 1, "%d", *(int *)tree->nodelist[root].data);
+    *line_end = (*line_end) + 1 + snprintf(&lines[line_num][(*line_end)+1], 200 - min(200, (*line_end)+1) + 1, "%d", *(int *)tree->nodelist[root].key);
 
     fillspace(&(lines[line_num+1][0]), min(200, *line_end));
 

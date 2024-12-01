@@ -2,14 +2,16 @@
 #define _LIST_
 
 typedef struct {
-    void *elements;
-    size_t capacity, size, esize;
+    void *keys;
+    size_t key_size;
+    size_t size;
+    size_t capacity;
 } LIST;
 
-int list_init(LIST *list, size_t size, size_t esize);
-int list_append(LIST *list, const void *eptr);
-int list_pop(LIST *list, void *eptr);
-int list_get(LIST *list, void *eptr, size_t index);
-int list_set(LIST *list, const void *eptr, size_t index);
+int list_init(LIST *list, size_t key_size, size_t size);
+int list_append(LIST *list, const void *key);
+int list_pop(LIST *list, void *key);
+int list_get(LIST *list, void *key, size_t index);
+int list_set(LIST *list, const void *key, size_t index);
 
 #endif // _LIST_

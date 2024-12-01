@@ -1,15 +1,15 @@
-#ifndef _PRIORITY_QUEUE_
-#define _PRIORITY_QUEUE_
+#ifndef _HEAP_
+#define _HEAP_
 
 typedef struct {
-    void *elements;
-    size_t esize, size, capacity;
+    void *keys;
+    size_t key_size, size, capacity;
     int (*comp)(const void *, const void *);
-} PRIORITY_QUEUE;
+} HEAP;
 
-int priority_queue_init(PRIORITY_QUEUE *pq, size_t esize, size_t capacity, int (*comp)(const void *, const void *));
-int priority_queue_push(PRIORITY_QUEUE *pq, const void *eptr);
-int priority_queue_pop(PRIORITY_QUEUE *pq, void *eptr);
-int priority_queue_top(PRIORITY_QUEUE *pq, void *eptr);
+int heap_init(HEAP *pq, size_t key_size, size_t capacity, int (*comp)(const void *, const void *));
+int heap_push(HEAP *pq, const void *key);
+int heap_pop(HEAP *pq, void *key);
+int heap_top(HEAP *pq, void *key);
 
-#endif // _PRIORITY_QUEUE_
+#endif // _HEAP_

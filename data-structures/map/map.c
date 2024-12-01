@@ -1,6 +1,8 @@
 #include<stdlib.h>
 #include<string.h>
+#include<assert.h>
 #include "map.h"
+#define N 1000000
 
 int prime(int x) {
     if(x < 2) return 0;
@@ -38,15 +40,20 @@ int next_prime(int x) {
     return x;
 }
 
-int map_init(MAP *mp, size_t size, size_t key_size, size_t value_size) {
-    if(size > N)
-        return -1;
+int map_init(MAP *mp, size_t key_size, size_t value_size, size_t capacity, int (*comp)(const void *, const void *)){
+    assert(mp != NULL);
+    assert(key_size != 0);
+    assert(value_size != 0);
+    assert(capacity != 0);
+    assert(capacity <= N);
+    assert(comp != NULL);
 
-    mp->table_size = next_prime(size);
+    mp->table_size = next_prime(capacity);
     mp->key_size = key_size;
     mp->value_size = value_size;
     mp->size = 0;
     mp->hash = _hash;
+    mp->comp = comp;
 
     if(NULL == (mp->table = (PAIR **)calloc(mp->table_size, sizeof(PAIR *))) )
         return -1;
@@ -61,7 +68,7 @@ PAIR *map_get_(MAP *mp, const void *key) {
     PAIR *cur = mp->table[hash_key];
 
     while(cur != NULL) {
-        if(strncmp(cur->key, key, mp->key_size) == 0) {
+        if(mp->comp(cur->key, key) == 0) {
             break;
         }
         cur = cur->next;
@@ -123,7 +130,7 @@ int map_delete(MAP *mp, const void *key) {
     PAIR *prev = NULL;
     
     while(cur != NULL) {
-        if(strncmp(cur->key, key, mp->key_size) == 0) {
+        if(mp->comp(cur->key, key) == 0) {
             break;
         }
         prev = cur;

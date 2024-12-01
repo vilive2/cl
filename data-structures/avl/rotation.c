@@ -1,5 +1,7 @@
 #include<stddef.h>
 #include "avl.h"
+#define HEIGHT(T, nodeindex) ( ((nodeindex) == -1) ? -1 : T->nodelist[nodeindex].height )
+#define MAX(a,b) (((a)>(b))?(a):(b))
 
 int rotate_LL(TREE *tree, int root_index) {
     int k2 = root_index;

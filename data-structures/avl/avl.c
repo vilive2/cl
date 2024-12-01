@@ -10,20 +10,21 @@ extern int free_node(TREE *, int);
 extern int get_free_node(TREE *);
 extern void inorder(TREE *, int, void **);
 
-int avl_init(TREE *tree, size_t key_size, int (*comp)(const void *, const void *)) {
+int avl_init(TREE *tree, size_t key_size, size_t capacity, int (*comp)(const void *, const void *)) {
     assert(tree != NULL);
     assert(key_size != 0);
+    assert(capacity != 0);
     assert(comp != NULL);
 
     tree->key_size = key_size;
     tree->comp = comp;
-    tree->capacity = 1;
+    tree->capacity = capacity;
     tree->size = 0;
     if(NULL == (tree->nodelist = (TNODE *)malloc(tree->capacity*sizeof(TNODE)))) {
         return -1;
     }
 
-    if(NULL == (tree->nodelist[0].data = malloc(key_size))) {
+    if(NULL == (tree->nodelist[0].key = malloc(key_size))) {
         return -1;
     }
 
@@ -38,7 +39,7 @@ int avl_init(TREE *tree, size_t key_size, int (*comp)(const void *, const void *
 int avl_search(TREE *tree, const void *key) {
     int cur = tree->root;
     while(cur != -1) {
-        int r = tree->comp(tree->nodelist[cur].data, key);
+        int r = tree->comp(tree->nodelist[cur].key, key);
         if( r == 0 ) 
             break;
         else if(r < 0) 
@@ -58,7 +59,7 @@ int avl_insert(TREE *tree, const void *key) {
 
     tree->nodelist[key_index].left = -1;
     tree->nodelist[key_index].right = -1;
-    memcpy(tree->nodelist[key_index].data, key, tree->key_size);
+    memcpy(tree->nodelist[key_index].key, key, tree->key_size);
 
     tree->nodelist[key_index].height = 0;
     tree->root = avl_insert_(tree, tree->root, key_index); 
@@ -91,9 +92,9 @@ extern int successor(TREE *tree, int root_index);
 int avl_insert_(TREE *tree, int root_index, int key_index) {
     if(root_index == -1) 
         return key_index;
-    else if(tree->nodelist[root_index].data < tree->nodelist[key_index].data) {
+    else if(tree->nodelist[root_index].key < tree->nodelist[key_index].key) {
         tree->nodelist[root_index].right = avl_insert_(tree, tree->nodelist[root_index].right, key_index);
-    } else if(tree->nodelist[root_index].data > tree->nodelist[key_index].data) {
+    } else if(tree->nodelist[root_index].key > tree->nodelist[key_index].key) {
         tree->nodelist[root_index].left = avl_insert_(tree, tree->nodelist[root_index].left, key_index);
     }
     
@@ -106,7 +107,7 @@ int avl_delete_(TREE *tree, int root_index, const void *key, int *key_index) {
         return -1;
     }
 
-    int r = tree->comp(key, tree->nodelist[root_index].data);
+    int r = tree->comp(key, tree->nodelist[root_index].key);
     if( r < 0 ) {
         tree->nodelist[root_index].left = avl_delete_(tree, tree->nodelist[root_index].left, key, key_index);
     } else if( r > 0 ) {
@@ -119,7 +120,7 @@ int avl_delete_(TREE *tree, int root_index, const void *key, int *key_index) {
             int succ_index = successor(tree, root_index);
             assert(succ_index != -1);
             tree->nodelist[root_index].right = avl_delete_(tree, tree->nodelist[root_index].right, 
-                                                    tree->nodelist[succ_index].data, &succ_index);
+                                                    tree->nodelist[succ_index].key, &succ_index);
             
             tree->nodelist[succ_index].left = tree->nodelist[root_index].left;
             tree->nodelist[succ_index].right = tree->nodelist[root_index].right;
