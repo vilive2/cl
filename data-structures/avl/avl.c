@@ -6,7 +6,7 @@
 
 int avl_insert_(TREE *, int, int);
 int avl_delete_(TREE *, int, const void *, int *);
-extern int free_node(TREE *, int);
+extern void free_node(TREE *, int);
 extern int get_free_node(TREE *);
 extern void inorder(TREE *, int, void **);
 
@@ -81,8 +81,9 @@ int avl_delete(TREE *tree, const void *key) {
     return 0;
 }
 
-int avl_keys(TREE *tree, void **keys) {
-    inorder(tree, tree->root, keys);
+int avl_keys(TREE *tree, void *keys) {
+    inorder(tree, tree->root, &keys);
+    return 0;
 }
 
 // driver functions
@@ -92,9 +93,9 @@ extern int successor(TREE *tree, int root_index);
 int avl_insert_(TREE *tree, int root_index, int key_index) {
     if(root_index == -1) 
         return key_index;
-    else if(tree->nodelist[root_index].key < tree->nodelist[key_index].key) {
+    else if(tree->comp(tree->nodelist[root_index].key, tree->nodelist[key_index].key) < 0) {
         tree->nodelist[root_index].right = avl_insert_(tree, tree->nodelist[root_index].right, key_index);
-    } else if(tree->nodelist[root_index].key > tree->nodelist[key_index].key) {
+    } else if(tree->comp(tree->nodelist[root_index].key, tree->nodelist[key_index].key) > 0) {
         tree->nodelist[root_index].left = avl_insert_(tree, tree->nodelist[root_index].left, key_index);
     }
     

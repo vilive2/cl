@@ -13,5 +13,6 @@ int list_append(LIST *list, const void *key);
 int list_pop(LIST *list, void *key);
 int list_get(LIST *list, void *key, size_t index);
 int list_set(LIST *list, const void *key, size_t index);
+void list_print(LIST *list, void (*printkey)(const void *));
 
 #endif // _LIST_

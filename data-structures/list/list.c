@@ -1,6 +1,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<assert.h>
+#include<stdio.h>
 #include "list.h"
 
 int list_init(LIST *list, size_t key_size, size_t size) {
@@ -63,4 +64,15 @@ int list_set(LIST *list, const void *key, size_t index) {
         return -1;
 
     return 0;
+}
+
+void list_print(LIST *list, void (*printkey)(const void *)) {
+    printf("[");
+
+    for(int i = 0 ; i < list->size ; i++) {
+        printkey(list->keys + i * list->key_size);
+        printf(", ");
+    }
+
+    printf("]\n");
 }

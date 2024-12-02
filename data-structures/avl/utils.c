@@ -147,3 +147,16 @@ int print_tree_(TREE *tree, int root, int line_num, int *line_end, char (*lines)
 
     return root_index;
 }
+
+void print_rotated_tree_(TREE *t, int root, int spaces, void (*printkey)(const void *), int maxwidth) {
+    if(root == -1 || spaces > maxwidth) return;
+    print_rotated_tree_(t, t->nodelist[root].right, spaces + 4, printkey, maxwidth);
+    printf("%*s", spaces, "");
+    printkey(t->nodelist[root].key);
+    printf("\n");
+    print_rotated_tree_(t, t->nodelist[root].left, spaces + 4, printkey, maxwidth);
+}
+
+void avl_print_rotated(TREE *t, void (*printkey)(const void *), int maxwidth) {
+    print_rotated_tree_(t, t->root, 0, printkey, maxwidth);
+}

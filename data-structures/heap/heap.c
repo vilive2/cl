@@ -1,6 +1,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<assert.h>
+#include<stdio.h>
 #include "heap.h"
 
 int heap_init(HEAP *pq, size_t key_size, size_t capacity, int (*comp)(const void *, const void *)) {
@@ -101,4 +102,17 @@ int heap_top(HEAP *pq, void *eptr) {
         return -1;
 
     return 0;
+}
+
+void print_rotated_tree_(HEAP *pq, int root, int spaces, void (*printkey)(const void *), int maxwidth) {
+    if(root >= pq->size || spaces > maxwidth) return;
+    print_rotated_tree_(pq, 2 * root + 2, spaces + 4, printkey, maxwidth);
+    printf("%*s", spaces, "");
+    printkey(pq->keys + root * pq->key_size);
+    printf("\n");
+    print_rotated_tree_(pq, 2 * root + 1, spaces + 4, printkey, maxwidth);
+}
+
+void heap_print_rotated(HEAP *pq, void (*printkey)(const void *), int maxwidth) {
+    print_rotated_tree_(pq, 0, 0, printkey, maxwidth);
 }

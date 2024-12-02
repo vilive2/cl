@@ -1,8 +1,13 @@
 #include<stdlib.h>
 #include<string.h>
 #include<assert.h>
+#include<stdio.h>
+#include <time.h>
 #include "map.h"
-#define N 1000000
+
+const int p = 1e9+7; // a prime number larger than max key
+int a; // a random number between [1, p-1]
+int b; // a random number between [0, p-1]
 
 int prime(int x) {
     if(x < 2) return 0;
@@ -25,6 +30,17 @@ size_t _hash(const MAP *mp, const void *key) {
     return hash_key;
 }
 
+size_t hash(const struct map *mp, const void *key) {
+    size_t k = _hash(mp, key);
+    size_t h = a % p;
+    k = k % p;
+    h = (h * k) % p;
+    h = (h + b) % p;
+    h = h % mp->table_size;
+
+    return h;
+}
+
 PAIR *create_pair(MAP *mp, const void *key) {
     PAIR *new_pair = (PAIR *)malloc(sizeof(PAIR));
     if(new_pair != NULL) {
@@ -45,14 +61,17 @@ int map_init(MAP *mp, size_t key_size, size_t value_size, size_t capacity, int (
     assert(key_size != 0);
     assert(value_size != 0);
     assert(capacity != 0);
-    assert(capacity <= N);
     assert(comp != NULL);
+
+    srand(time(NULL));
+    a = 1 + (rand() % p);
+    b = rand() % p;
 
     mp->table_size = next_prime(capacity);
     mp->key_size = key_size;
     mp->value_size = value_size;
     mp->size = 0;
-    mp->hash = _hash;
+    mp->hash = hash;
     mp->comp = comp;
 
     if(NULL == (mp->table = (PAIR **)calloc(mp->table_size, sizeof(PAIR *))) )
@@ -84,6 +103,7 @@ int map_get(MAP *mp, const void *key, void *value) {
     if(node != NULL) {
         if(NULL == memcpy(value, node->value, mp->value_size) )
             return -1;
+        return 1;
     }
 
     return 0;
@@ -148,4 +168,19 @@ int map_delete(MAP *mp, const void *key) {
     free(cur);
 
     return 0;
+}
+
+void map_print(MAP *mp, void (*printkey)(const void *key, const void *value)) {
+    for(int i = 0 ; i < mp->table_size ; i++) {
+        printf("%d: [", i);
+
+        PAIR *cur = mp->table[i];
+        while(cur != NULL) {
+            printkey(cur->key, cur->value);
+            cur = cur->next;
+            printf(", ");
+        }
+
+        printf("]\n");
+    }
 }

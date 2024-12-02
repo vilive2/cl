@@ -1,6 +1,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<assert.h>
+#include<stdio.h>
 #include "stack.h"
 
 int stack_init(STACK *s, size_t key_size, size_t capacity) {
@@ -45,4 +46,15 @@ int stack_top(STACK *s, void *eptr) {
     memcpy(eptr, s->keys + (s->size-1) * s->key_size, s->key_size);
     
     return 0;
+}
+
+void stack_print(STACK *s, void (*printkey)(const void *)) {
+    printf("[\n");
+
+    for(int i = s->size - 1 ; i >= 0 ; i--) {
+        printkey(s->keys + i * s->key_size);
+        printf("\n");
+    }
+
+    printf("]\n");
 }

@@ -6,7 +6,6 @@ typedef struct {
     int left;
     int right; 
     int height;
-    void *other;
 } TNODE;
 
 typedef struct{
@@ -23,6 +22,7 @@ int avl_init(TREE *tree, size_t key_size, size_t capacity, int (*comp)(const voi
 int avl_search(TREE *tree, const void *key);
 int avl_insert(TREE *tree, const void *key);
 int avl_delete(TREE *tree, const void *key);
-int avl_keys(TREE *tree, void **keys);
+int avl_keys(TREE *tree, void *keys);
+void avl_print_rotated(TREE *t, void (*printkey)(const void *), int maxwidth);
 
 #endif // _AVL_

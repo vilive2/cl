@@ -1,6 +1,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<assert.h>
+#include<stdio.h>
 #include "queue.h"
 
 int queue_init(QUEUE *q, size_t key_size, size_t capacity) {
@@ -58,4 +59,17 @@ int queue_front(QUEUE *q, void *key) {
         return -1;
 
     return 0;
+}
+
+void queue_print(QUEUE *q, void (*printkey)(const void *)) {
+    int cur = q->front;
+    printf("[");
+
+    for(int i = 0 ; i < q->size ; i++) {
+        printkey(q->keys + cur * q->key_size);
+        cur = (cur + 1) % q->capacity;
+        printf(", ");
+    }
+
+    printf("]\n");
 }

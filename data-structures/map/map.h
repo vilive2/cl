@@ -22,5 +22,6 @@ int map_get(MAP *mp, const void *key, void *value);
 int map_put(MAP *mp, const void *key, const void *value);
 int map_keys(MAP *mp, void *keys);
 int map_delete(MAP *mp, const void *key);
+void map_print(MAP *mp, void (*printkey)(const void *key, const void *value));
 
 #endif // _MAP_
